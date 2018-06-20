@@ -1,4 +1,3 @@
-# node_gql
 Node server with GQL API
 # Node server
 
