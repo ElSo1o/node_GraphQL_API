@@ -13,5 +13,3 @@ npm start
 # build for production with minification
 npm build
 ```
-
-For detailed explanation on how things work, consult the [docs for vue-loader](http://vuejs.github.io/vue-loader).
