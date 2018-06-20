@@ -1,4 +1,3 @@
-Node server with GQL API
 # Node server
 
 > GraphQl API
