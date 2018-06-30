@@ -14,7 +14,8 @@ const mongoose = require('mongoose')
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const {typeDefs, resolvers} = require('./graphQL/index')
+const {typeDefs} = require('./graphQL/index')
+const {resolvers} = require('./config/index')
 const app = express();
 
 const assert = require('assert');
@@ -25,6 +26,12 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'ElSoloDb';
 // view engine setup
 
+
+const jwtCheck = jwt({ secret: 'shhhhhhared-secret' });
+
+// app.use(jwtCheck);
+
+
 const schema = makeExecutableSchema({
     typeDefs,
     resolvers
@@ -32,12 +39,16 @@ const schema = makeExecutableSchema({
 
 mongoose.connect(`${url}/${dbName}`);
 const Cat = mongoose.model('cats', { name: String });
-const Users = mongoose.model('users', { name: String, password: String });
+const Users = mongoose.model('users', { login: String, password: String });
 
 
 app.use('/graphql', bodyParser.json(), graphqlExpress((req) => ({
     schema: schema,
-    context: {Cat, Users},
+    context: {
+        Cat: Cat,
+        Users: Users,
+        us: req.user
+    },
     pretty: true,
     graphiql: true
 })));
@@ -50,6 +61,7 @@ app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
 app.use(express.json());
+app.use(bodyParser.json())
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
