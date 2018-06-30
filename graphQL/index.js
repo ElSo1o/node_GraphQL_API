@@ -1,63 +1,37 @@
 const { buildSchema } = require('graphql');
-exports.schema = buildSchema(`
-      type Query {
-        post(_id: String): Post
-        posts: [Post]
-        comment(_id: String): Comment
-      }
-      type Post {
-        _id: String
-        title: String
-        content: String
-        comments: [Comment]
-      }
-      type Comment {
-        _id: String
-        postId: String
-        content: String
-        post: Post
-      }
-      type Mutation {
-        createPost(title: String, content: String): Post
-        createComment(postId: String, content: String): Comment
-      }
-      schema {
-        query: Query
-        mutation: Mutation
-      }
-    `);
 
-const prepare = (o) => {
-    o._id = o._id.toString()
-    return o
-}
+exports.typeDefs = `
+         type Cat {
+      _id: String!
+      name: String!
+    }
+    type Query {
+      allCats: [Cat!]!
+    }
+    type Mutation {
+      createCat(name: String!): Cat!
+    }
+    `
 
-exports.root = {
+exports.resolvers = {
     Query: {
-        post: async (root, {_id}) => {
-            return prepare(await Posts.findOne(ObjectId(_id)))
-        }
-    },
-    Post: {
-        comments: async ({_id}) => {
-            return (await Comments.find({postId: _id}).toArray()).map(prepare)
-        }
-    },
-    Comment: {
-        post: async ({postId}) => {
-            return prepare(await Posts.findOne(ObjectId(postId)))
-        }
+        allCats: async (parent, args, { Cat }) => {
+            // { _id: 123123, name: "whatever"}
+            const cats = await Cat.find();
+            return cats.map((x) => {
+                x._id = x._id.toString();
+                return x;
+            });
+        },
     },
     Mutation: {
-        createPost: async (root, args, context, info) => {
-            const res = await Posts.insert(args)
-            return prepare(await Posts.findOne({_id: res.insertedIds[1]}))
+        createCat: async (parent, args, { Cat }) => {
+            // { _id: 123123, name: "whatever"}
+            const kitty = await new Cat(args).save();
+            kitty._id = kitty._id.toString();
+            return kitty;
         },
-        createComment: async (root, args) => {
-            const res = await Comments.insert(args)
-            return prepare(await Comments.findOne({_id: res.insertedIds[1]}))
-        },
-    },
+    }
 }
 
 // exports.root = {

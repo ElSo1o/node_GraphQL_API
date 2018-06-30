@@ -6,11 +6,15 @@ const logger = require('morgan');
 const graphqlHTTP = require('express-graphql');
 const MongoClient = require('mongodb').MongoClient;
 const jwt = require('express-jwt')
+const bodyParser = require('body-parser')
+
+const { graphiqlExpress, graphqlExpress } =   require('apollo-server-express')
+const { makeExecutableSchema } = require('graphql-tools')
+const mongoose = require('mongoose')
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const {schema, root} = require('./graphQL/index')
-const mongoose = require('mongoose')
+const {typeDefs, resolvers} = require('./graphQL/index')
 const app = express();
 
 const assert = require('assert');
@@ -20,6 +24,21 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'ElSoloDb';
 // view engine setup
+
+const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers
+});
+
+mongoose.connect(`${url}/ElSoloDb`);
+const Cat = mongoose.model('Cat', { name: String });
+
+
+app.use('/graphql', bodyParser.json(), graphqlExpress({ schema, context: { Cat } }));
+
+app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
+
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -31,44 +50,37 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+//
+// app.use('/graphql', jwt({
+//     secret: 'shhhhhhared-secret',
+//     requestProperty: 'auth',
+//     credentialsRequired: false,
+// }));
 
-app.use('/graphql', jwt({
-    secret: 'shhhhhhared-secret',
-    requestProperty: 'auth',
-    credentialsRequired: false,
-}));
 
-
-app.use('/graphql', graphqlHTTP({
-    schema: schema,
-    rootValue: root,
-    graphiql: true,
-}));
+// app.use('/graphql', graphqlHTTP({
+//     schema: schema,
+//     rootValue: root,
+//     graphiql: true,
+// }));
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
   next(createError(404));
 });
-function loggingMiddleware(req, res, next) {
-    console.log('ip:', req.ip);
-    next();
-}
 
-
-app.use(loggingMiddleware);
-
-MongoClient.connect(url, (err, client) => {
-    if (err) {
-        throw err;
-    }
-    const db = client.db(dbName);
-    db.collection('users').find().toArray((err, result) => {
-        if (err) {
-            throw err;
-        }
-        console.log(result);
-    });
-    client.close()
-});
+// MongoClient.connect(url, (err, client) => {
+//     if (err) {
+//         throw err;
+//     }
+//     const db = client.db(dbName);
+//     db.collection('users').find().toArray((err, result) => {
+//         if (err) {
+//             throw err;
+//         }
+//         console.log(result);
+//     });
+//     client.close()
+// });
 
 // error handler
 app.use((err, req, res, next) => {
