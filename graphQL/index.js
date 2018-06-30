@@ -1,24 +1,41 @@
-const { buildSchema } = require('graphql');
-
 exports.typeDefs = `
          type Cat {
-      _id: String!
-      name: String!
-    }
-    type Query {
-      allCats: [Cat!]!
-    }
-    type Mutation {
-      createCat(name: String!): Cat!
-    }
+          _id: String!
+          name: String!
+        }
+        type Users {
+          _id: String!
+          name: String!
+          password: String!
+        }
+        type Query {
+          allCats: [Cat!]!
+          allUsers: [Users!]!
+        }
+        type Mutation {
+          createCat(name: String!): Cat!
+        }
     `
 
 exports.resolvers = {
     Query: {
         allCats: async (parent, args, { Cat }) => {
             // { _id: 123123, name: "whatever"}
+            console.log(parent)
+            console.log(args)
+            // console.log(Cat)
             const cats = await Cat.find();
             return cats.map((x) => {
+                x._id = x._id.toString();
+                return x;
+            });
+        },
+        allUsers: async (parent, args, { Users }) => {
+            console.log(parent)
+            console.log(args)
+            console.log(Users)
+            const users = await Users.find();
+            return users.map((x) => {
                 x._id = x._id.toString();
                 return x;
             });
@@ -33,21 +50,3 @@ exports.resolvers = {
         },
     }
 }
-
-// exports.root = {
-//     hello: async () => {
-//         return await 'Hello Elsolo';
-//     },
-//     rollDice: function ({numDice, numSides}) {
-//         let output = [];
-//         for (let i = 0; i < numDice; i++) {
-//             output.push(1 + Math.floor(Math.random() * (numSides || 6)));
-//         }
-//         return output;
-//     }
-// };
-
-// const schema = makeExecutableSchema({
-//     typeDefs,
-//     resolvers
-// })

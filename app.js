@@ -30,11 +30,17 @@ const schema = makeExecutableSchema({
     resolvers
 });
 
-mongoose.connect(`${url}/ElSoloDb`);
-const Cat = mongoose.model('Cat', { name: String });
+mongoose.connect(`${url}/${dbName}`);
+const Cat = mongoose.model('cats', { name: String });
+const Users = mongoose.model('users', { name: String, password: String });
 
 
-app.use('/graphql', bodyParser.json(), graphqlExpress({ schema, context: { Cat } }));
+app.use('/graphql', bodyParser.json(), graphqlExpress((req) => ({
+    schema: schema,
+    context: {Cat, Users},
+    pretty: true,
+    graphiql: true
+})));
 
 app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }));
 
