@@ -1,3 +1,4 @@
+'use strict';
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
@@ -27,7 +28,7 @@ const dbName = 'ElSoloDb';
 // view engine setup
 
 
-const jwtCheck = jwt({ secret: 'shhhhhhared-secret' });
+const jwtCheck = jwt({ secret: 'somesuperdupersecret' });
 
 // app.use(jwtCheck);
 
@@ -47,7 +48,7 @@ app.use('/graphql', bodyParser.json(), graphqlExpress((req) => ({
     context: {
         Cat: Cat,
         Users: Users,
-        us: req.user
+        req: req.user
     },
     pretty: true,
     graphiql: true

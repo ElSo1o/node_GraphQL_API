@@ -11,15 +11,24 @@ exports.resolvers = {
                 return x;
             });
         },
-        allUsers: async (parent, args, { Users, user }) => {
+        allUsers: async (parent, args, { Users, req }) => {
             console.log(parent)
             console.log(args)
-            console.log(user)
-            const users = await Users.find();
-            return users.map(x => {
-                x._id = x._id.toString();
-                return x;
-            });
+            console.log(req)
+            if(args.login){
+                const users = await Users.findOne({
+                    login: args.login
+                });
+                console.log(users)
+                return [users]
+            }
+            else {
+                const user = await Users.find();
+                return user.map((x) => {
+                    x._id = x._id.toString();
+                    return x;
+                });
+            }
         }
     },
     Mutation: {
