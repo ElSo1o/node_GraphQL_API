@@ -4,6 +4,10 @@ exports.typeDefs =
           login: String!
           password: String!
         }
+        type SigninPayload {
+            token: String
+            user: Users
+        }
          type Cat {
           _id: String!
           name: String!
@@ -15,5 +19,6 @@ exports.typeDefs =
         type Mutation {
           createCat(name: String!): Cat!
           createUser(login: String!, password: String!): Users!
+          singIn(login: String!, password: String!): SigninPayload!
         }
 `

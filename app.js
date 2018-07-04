@@ -15,8 +15,11 @@ const mongoose = require('mongoose')
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const {typeDefs} = require('./graphQL/index')
+const {typeDefs} = require('./graphQL/shema')
 const {resolvers} = require('./config/index')
+
+
+
 const app = express();
 
 const assert = require('assert');
@@ -27,10 +30,8 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'ElSoloDb';
 // view engine setup
 
-
-const jwtCheck = jwt({ secret: 'somesuperdupersecret' });
-
-// app.use(jwtCheck);
+const checkJwt = jwt({ secret: 'shhhhhhared-secret'}).unless({path: ['/graphql','/graphiql']})
+app.use(checkJwt);
 
 
 const schema = makeExecutableSchema({
@@ -38,17 +39,34 @@ const schema = makeExecutableSchema({
     resolvers
 });
 
+function loggingMiddleware(req, res, next) {
+    console.log('ip:', req.ip);
+    const authHeader = req.headers;
+    // console.log(authHeader)
+    next();
+}
+
+const root = {
+    ip: (args, request) => {
+        console.log(`IP IS A ${request.ip}`)
+        return request.ip;
+    }
+};
+app.use(loggingMiddleware);
+
 mongoose.connect(`${url}/${dbName}`);
+
 const Cat = mongoose.model('cats', { name: String });
 const Users = mongoose.model('users', { login: String, password: String });
 
-
-app.use('/graphql', bodyParser.json(), graphqlExpress((req) => ({
+app.use('/graphql', bodyParser.json(), graphqlExpress((req, res) => ({
     schema: schema,
+    rootValue: root,
     context: {
         Cat: Cat,
         Users: Users,
-        req: req.user
+        req: req,
+        res: res
     },
     pretty: true,
     graphiql: true
