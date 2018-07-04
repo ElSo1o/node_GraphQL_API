@@ -3,6 +3,7 @@ exports.typeDefs =
           _id: String!
           login: String!
           password: String!
+          type: Int!
         }
         type SigninPayload {
             token: String

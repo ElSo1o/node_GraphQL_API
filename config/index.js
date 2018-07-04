@@ -25,7 +25,6 @@ exports.resolvers = {
             });
         },
         allUsers: async (parent, args, { Users, req, res }) => {
-            // console.log(parent)
             console.log(args)
 
             // console.log(get_cookies(req.headers.cookie)
@@ -50,8 +49,10 @@ exports.resolvers = {
                     return [user]
                 }
                 else {
+                    console.log(Users)
                     const user = await Users.find();
                     return user.map((x) => {
+                        console.log(x.type)
                         x._id = x._id.toString();
                         return x;
                     });
