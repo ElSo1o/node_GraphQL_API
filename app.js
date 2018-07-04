@@ -4,8 +4,6 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const graphqlHTTP = require('express-graphql');
-const MongoClient = require('mongodb').MongoClient;
 const jwt = require('express-jwt')
 const bodyParser = require('body-parser')
 

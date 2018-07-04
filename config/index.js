@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt')
 const jsonwebtoken = require('jsonwebtoken')
-const cookieParser = require('cookie-parser');
 
 const get_cookies = function(request) {
     let cookies = {};
@@ -27,37 +26,36 @@ exports.resolvers = {
         },
         allUsers: async (parent, args, { Users, req, res }) => {
             // console.log(parent)
-            // console.log(args)
+            console.log(args)
 
-            console.log(get_cookies(req)['access_token'])
+            // console.log(get_cookies(req.headers.cookie)
             if(!req.headers.cookie){
                 throw new Error('Not Token')
-            }
-            console.log('test')
-            if(args.login){
-                const user = await Users.findOne({
-                    login: args.login
-                });
-                if (!user) {
-                    throw new Error('No user with that login')
+            } else {
+                console.log(get_cookies(req.headers.cookie))
+                if(args.login){
+                    const user = await Users.findOne({
+                        login: args.login
+                    });
+                    if (!user) {
+                        throw new Error('No user with that login')
+                    }
+                    // const valid = await bcrypt.compare(args.password, user.password)
+                    //
+                    // if (!valid) {
+                    //     throw new Error('Incorrect password')
+                    // }
+                    // console.log(user)
+                    user.token = null
+                    return [user]
                 }
-                // const valid = await bcrypt.compare(args.password, user.password)
-                //
-                // if (!valid) {
-                //     throw new Error('Incorrect password')
-                // }
-                // console.log(user)
-                user.token = null
-                return [user]
-                // console.log(user)
-                // return [user]
-            }
-            else {
-                const user = await Users.find();
-                return user.map((x) => {
-                    x._id = x._id.toString();
-                    return x;
-                });
+                else {
+                    const user = await Users.find();
+                    return user.map((x) => {
+                        x._id = x._id.toString();
+                        return x;
+                    });
+                }
             }
         }
     },
@@ -78,27 +76,40 @@ exports.resolvers = {
         singIn: async (parent, args, { Users, req, res }) => {
             // console.log(req)
             // console.log(res)
-            console.log(Users)
+            // console.log(Users)
             if(args.login && args.password){
                 const user = await Users.findOne({
-                    login: args.login
+                    login: args.login,
+                    password: args.password
                 });
                 if (!user) {
                     throw new Error('No user with that login')
                 }
-                // const valid = await bcrypt.compare(args.password, user.password)
+                console.log(args)
+                console.log(user)
+                // const hash = bcrypt.hashSync(user.password);
+                // console.log(hash)
+                // const hash = bcrypt.hashSync(args.password, 10);
                 //
+                // bcrypt.compare(user.password, hash, function(err, res) {
+                //     // res == true
+                //     console.log(res)
+                //     console.log(err)
+                // });
+                // const valid = await bcrypt.compare(args.password, user.password)
+                // console.log(valid)
                 // if (!valid) {
                 //     throw new Error('Incorrect password')
                 // }
 
-                const token = jsonwebtoken.sign(
-                    {
-                    id: user._id,
-                    email: user.login
+                const token = jsonwebtoken.sign({
+                        id: user._id,
+                        email: user.login
                     },
-                    'somesuperdupersecret',
-                    { expiresIn: '1h' })
+                        'somesuperdupersecret',
+                    {
+                        expiresIn: '1h'
+                    })
                 // console.log(user)
                 res.cookie('access_token', token)
                 return {token,user}
