@@ -1,9 +1,9 @@
 const mongoose = require('mongoose')
 const url = 'mongodb://localhost:27017';
 /***dev**/
-const dbName = 'ElSoloDb';
+// const dbName = 'ElSoloDb';
 /***production**/
-// const dbName = 'elsolodb';
+const dbName = 'elsolodb';
 mongoose.connect(`${url}/${dbName}`);
 
 exports.Cat = mongoose.model('cats', { name: String });
