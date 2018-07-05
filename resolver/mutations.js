@@ -1,12 +1,6 @@
 const jsonwebtoken = require('jsonwebtoken')
 const {token, get_cookies} = require('./verifycations')
 exports.mutations = {
-    createCat: async (parent, args, { Cat }) => {
-        // { _id: 123123, name: "whatever"}
-        const kitty = await new Cat(args).save();
-        kitty._id = kitty._id.toString();
-        return kitty;
-    },
         createUser: async (parent, args, { Users, req, res  }) => {
         let result
         console.log(args)

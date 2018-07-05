@@ -11,15 +11,6 @@ const {token, get_cookies} = require('./verifycations')
 //     return cookies;
 // };
 exports.query = {
-    allCats: async (parent, args, { Cat, req }) => {
-        // console.log(args)
-        // console.log(Cat)
-        const cats = await Cat.find();
-        return cats.map((x) => {
-            x._id = x._id.toString();
-            return x;
-        });
-    },
         allUsers: async (parent, args, { Users, req, res }) => {
         let result
         console.log(args)
