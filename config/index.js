@@ -26,37 +26,50 @@ exports.resolvers = {
         },
         allUsers: async (parent, args, { Users, req, res }) => {
             console.log(args)
-
             // console.log(get_cookies(req.headers.cookie)
             if(!req.headers.cookie){
                 throw new Error('Not Token')
             } else {
-                console.log(get_cookies(req.headers.cookie))
-                if(args.login){
-                    const user = await Users.findOne({
-                        login: args.login
-                    });
-                    if (!user) {
-                        throw new Error('No user with that login')
+                // console.log(req.headers.cookie)
+                // console.log(get_cookies(req))
+                const t = get_cookies(req).access_token
+                console.log(t)
+
+                const result = jsonwebtoken.verify(t, 'shhhhh-secret',  async (err, decoded) => {
+                    let result
+                    if(err){
+                        console.log(err)
+                        throw new Error('Invalid Token')
+                    } else {
+                        console.log(decoded);
+                        if(args.login){
+                            const user = await Users.findOne({
+                                login: args.login
+                            });
+                            if (!user) {
+                                throw new Error('No user with that login')
+                            }
+                            // const valid = await bcrypt.compare(args.password, user.password)
+                            //
+                            // if (!valid) {
+                            //     throw new Error('Incorrect password')
+                            // }
+                            // console.log(user)
+                            result = [user]
+                        }
+                        else {
+                            // console.log(Users)
+                            const user = await Users.find();
+                            result = user.map((x) => {
+                                console.log(x.type)
+                                x._id = x._id.toString();
+                                return x;
+                            });
+                        }
                     }
-                    // const valid = await bcrypt.compare(args.password, user.password)
-                    //
-                    // if (!valid) {
-                    //     throw new Error('Incorrect password')
-                    // }
-                    // console.log(user)
-                    user.token = null
-                    return [user]
-                }
-                else {
-                    console.log(Users)
-                    const user = await Users.find();
-                    return user.map((x) => {
-                        console.log(x.type)
-                        x._id = x._id.toString();
-                        return x;
-                    });
-                }
+                    return result
+                });
+                return result
             }
         }
     },
@@ -75,9 +88,6 @@ exports.resolvers = {
             return us;
         },
         singIn: async (parent, args, { Users, req, res }) => {
-            // console.log(req)
-            // console.log(res)
-            // console.log(Users)
             if(args.login && args.password){
                 const user = await Users.findOne({
                     login: args.login,
@@ -105,14 +115,17 @@ exports.resolvers = {
 
                 const token = jsonwebtoken.sign({
                         id: user._id,
-                        email: user.login
+                        login: user.login,
+                        type: user.type
                     },
-                        'somesuperdupersecret',
+                        'shhhhh-secret',
                     {
                         expiresIn: '1h'
                     })
                 // console.log(user)
+                // res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
                 res.cookie('access_token', token)
+
                 return {token,user}
             } else {
                 throw new Error('Password or Login not empty')

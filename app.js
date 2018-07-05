@@ -4,15 +4,15 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const jwt = require('express-jwt')
-const bodyParser = require('body-parser')
-const { graphiqlExpress, graphqlExpress } =   require('apollo-server-express')
-const { makeExecutableSchema } = require('graphql-tools')
+const jwt = require('express-jwt');
+const bodyParser = require('body-parser');
+const { graphiqlExpress, graphqlExpress } =   require('apollo-server-express');
+const { makeExecutableSchema } = require('graphql-tools');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const {typeDefs} = require('./graphQL/shema')
-const {resolvers} = require('./config/index')
-const {Cat, Users} = require('./config/collections')
+const {typeDefs} = require('./graphQL/shema');
+const {resolvers} = require('./config/index');
+const {Cat, Users} = require('./config/collections');
 const assert = require('assert');
 
 const app = express();
@@ -25,8 +25,13 @@ const schema = makeExecutableSchema({
 });
 
 const loggingMiddleware = (req, res, next) => {
+    // console.log(req)
+    // if(!req.headers.cookie){
+    //     throw new Error('Aunthenication!')
+    // }
     console.log('ip:', req.ip);
     const authHeader = req.headers;
+    // res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
     // console.log(authHeader.cookie)
     next();
 }
@@ -38,22 +43,6 @@ const root = {
     }
 };
 app.use(loggingMiddleware);
-
-app.use('/api', bodyParser.json(), graphqlExpress((req, res) => ({
-    schema: schema,
-    rootValue: root,
-    context: {
-        Cat: Cat,
-        Users: Users,
-        req: req,
-        res: res
-    },
-    pretty: true,
-    graphiql: true
-})));
-
-app.use('/console', graphiqlExpress({ endpointURL: '/api' }));
-
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -68,6 +57,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/api', bodyParser.json(), graphqlExpress((req, res) => ({
+    schema: schema,
+    rootValue: root,
+    context: {
+        Cat: Cat,
+        Users: Users,
+        req: req,
+        res: res
+    },
+    pretty: true,
+    graphiql: true
+})));
+app.use('/console', graphiqlExpress({ endpointURL: '/api' }));
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
