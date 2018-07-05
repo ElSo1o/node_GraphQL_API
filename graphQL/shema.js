@@ -19,7 +19,7 @@ exports.typeDefs =
         }
         type Mutation {
           createCat(name: String!): Cat!
-          createUser(login: String!, password: String!): Users!
+          createUser(login: String!, password: String!, type: Int!): Users!
           singIn(login: String!, password: String!): SigninPayload!
         }
 `

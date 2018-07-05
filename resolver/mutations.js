@@ -1,4 +1,5 @@
 const jsonwebtoken = require('jsonwebtoken')
+const {token, get_cookies} = require('./verifycations')
 exports.mutations = {
     createCat: async (parent, args, { Cat }) => {
         // { _id: 123123, name: "whatever"}
@@ -6,12 +7,32 @@ exports.mutations = {
         kitty._id = kitty._id.toString();
         return kitty;
     },
-        createUser: async (parent, args, { Users }) => {
+        createUser: async (parent, args, { Users, req, res  }) => {
+        let result
         console.log(args)
         // console.log(Users)
-        const us = await new Users(args).save();
-        us._id = us._id.toString();
-        return us;
+            if(!req.headers.cookie){
+                throw new Error('Not Token')
+            } else {
+                const tokenStr = get_cookies(req).access_token
+                const verify = token(tokenStr)
+                if(verify.value === null || verify.err !== null) {
+                    throw new Error('Invalid Token')
+                } else {
+                    if(verify.value.type === 3){
+                        if(!args.login || !args.password){
+                            throw new Error('fields must not be empty')
+                        } else {
+                            result = await new Users(args).save();
+                            result._id = result._id.toString();
+                        }
+                    } else {
+                        throw new Error('Not access denied')
+                    }
+                }
+            }
+
+        return result;
     },
         singIn: async (parent, args, { Users, req, res }) => {
         if(args.login && args.password){

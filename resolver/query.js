@@ -1,15 +1,15 @@
 const jsonwebtoken = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
-const verifyToken = require('./verifycations')
+const {token, get_cookies} = require('./verifycations')
 
-const get_cookies = function(request) {
-    let cookies = {};
-    request.headers && request.headers.cookie.split(';').forEach(function(cookie) {
-        let parts = cookie.match(/(.*?)=(.*)$/)
-        cookies[ parts[1].trim() ] = (parts[2] || '').trim();
-    });
-    return cookies;
-};
+// const get_cookies = function(request) {
+//     let cookies = {};
+//     request.headers && request.headers.cookie.split(';').forEach(function(cookie) {
+//         let parts = cookie.match(/(.*?)=(.*)$/)
+//         cookies[ parts[1].trim() ] = (parts[2] || '').trim();
+//     });
+//     return cookies;
+// };
 exports.query = {
     allCats: async (parent, args, { Cat, req }) => {
         // console.log(args)
@@ -29,8 +29,10 @@ exports.query = {
         } else {
             // console.log(req.headers.cookie)
             // console.log(get_cookies(req))
-            const token = get_cookies(req).access_token
-            const verify = verifyToken.token(token)
+            const tokenStr = get_cookies(req).access_token
+            console.log(token(tokenStr))
+            const verify = token(tokenStr)
+
             // console.log(verifyToken.token(token))
 
             if(verify.value === null || verify.err !== null) {
