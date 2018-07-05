@@ -1,3 +1,4 @@
+const jsonwebtoken = require('jsonwebtoken')
 exports.mutations = {
     createCat: async (parent, args, { Cat }) => {
         // { _id: 123123, name: "whatever"}

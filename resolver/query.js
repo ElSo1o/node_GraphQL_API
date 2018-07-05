@@ -1,5 +1,6 @@
 const jsonwebtoken = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+const verifyToken = require('./verifycations')
 
 const get_cookies = function(request) {
     let cookies = {};
@@ -20,6 +21,7 @@ exports.query = {
         });
     },
         allUsers: async (parent, args, { Users, req, res }) => {
+        let result
         console.log(args)
         // console.log(get_cookies(req.headers.cookie)
         if(!req.headers.cookie){
@@ -28,14 +30,14 @@ exports.query = {
             // console.log(req.headers.cookie)
             // console.log(get_cookies(req))
             const token = get_cookies(req).access_token
-            // console.log(token)
-            const result = jsonwebtoken.verify(token, 'shhhhh-secret',  async (err, decoded) => {
-                let result
-                if(err){
-                    console.log(err)
-                    throw new Error('Invalid Token')
-                } else {
-                    console.log(decoded);
+            const verify = verifyToken.token(token)
+            // console.log(verifyToken.token(token))
+
+            if(verify.value === null || verify.err !== null) {
+                throw new Error('Invalid Token')
+            } else {
+                console.log(typeof verify.value.type)
+                if(verify.value.type === 3){
                     if(args.login){
                         const user = await Users.findOne({
                             login: args.login
@@ -60,9 +62,10 @@ exports.query = {
                             return x;
                         });
                     }
+                } else {
+                    throw new Error('Not access denied')
                 }
-                return result
-            });
+            }
             return result
         }
     }
