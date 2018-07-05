@@ -11,8 +11,8 @@ const { makeExecutableSchema } = require('graphql-tools');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const {typeDefs} = require('./graphQL/shema');
-const {resolvers} = require('./config/index');
-const {Cat, Users} = require('./config/collections');
+const {resolvers} = require('./resolver/index');
+const {Cat, Users} = require('./db/collections');
 const assert = require('assert');
 
 const app = express();
