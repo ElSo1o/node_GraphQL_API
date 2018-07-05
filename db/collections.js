@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const url = 'mongodb://localhost:27017';
+const url = 'mongodb://ElSolo:Inbeatwetrust1710919856@ds227481.mlab.com:27481';
 /***dev**/
 // const dbName = 'ElSoloDb';
 /***production**/
