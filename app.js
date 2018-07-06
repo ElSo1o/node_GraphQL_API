@@ -1,19 +1,20 @@
 'use strict';
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
-const jwt = require('express-jwt');
-const bodyParser = require('body-parser');
-const { graphiqlExpress, graphqlExpress } =   require('apollo-server-express');
-const { makeExecutableSchema } = require('graphql-tools');
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-const {typeDefs} = require('./graphQL/shema');
-const {resolvers} = require('./resolver/index');
-const {Cat, Users} = require('./db/collections');
-const assert = require('assert');
+const createError = require('http-errors'),
+ express = require('express'),
+ path = require('path'),
+ cookieParser = require('cookie-parser'),
+ logger = require('morgan'),
+ jwt = require('express-jwt'),
+ bodyParser = require('body-parser'),
+ { graphiqlExpress, graphqlExpress } =   require('apollo-server-express'),
+ { makeExecutableSchema } = require('graphql-tools'),
+ indexRouter = require('./routes/index'),
+ usersRouter = require('./routes/users'),
+ {typeDefs} = require('./graphQL/shema'),
+ {resolvers} = require('./resolver/index'),
+ {Cat, Users} = require('./db/collections'),
+ assert = require('assert'),
+ cors = require('cors')
 
 const app = express();
 
@@ -46,7 +47,7 @@ app.use(loggingMiddleware);
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
+app.use(cors())
 app.use(checkJwt);
 app.use(logger('dev'));
 app.use(express.json());
