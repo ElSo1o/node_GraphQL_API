@@ -12,15 +12,20 @@ const {token, get_cookies} = require('./verifycations')
 // };
 exports.query = {
         allUsers: async (parent, args, { Users, req, res }) => {
-        let result
+        let result,tokenStr
         console.log(args)
         // console.log(get_cookies(req.headers.cookie)
         if(!req.headers.cookie){
+            // throw new Error('Not Token')
+            tokenStr = req.headers.authentication
+        } else {
+            tokenStr = get_cookies(req).access_token
+        }
+        if(!tokenStr){
             throw new Error('Not Token')
         } else {
             // console.log(req.headers.cookie)
             // console.log(get_cookies(req))
-            const tokenStr = get_cookies(req).access_token
             console.log(token(tokenStr))
             const verify = token(tokenStr)
 

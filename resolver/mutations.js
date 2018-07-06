@@ -2,13 +2,18 @@ const jsonwebtoken = require('jsonwebtoken')
 const {token, get_cookies} = require('./verifycations')
 exports.mutations = {
         createUser: async (parent, args, { Users, req, res  }) => {
-        let result
-        console.log(args)
-        // console.log(Users)
+            let result,tokenStr
+            console.log(args)
             if(!req.headers.cookie){
+                // throw new Error('Not Token')
+                tokenStr = req.headers.authorization
+            } else {
+                tokenStr = get_cookies(req).access_token
+            }
+            console.log(tokenStr)
+            if(!tokenStr) {
                 throw new Error('Not Token')
             } else {
-                const tokenStr = get_cookies(req).access_token
                 const verify = token(tokenStr)
                 if(verify.value === null || verify.err !== null) {
                     throw new Error('Invalid Token')
@@ -25,51 +30,51 @@ exports.mutations = {
                     }
                 }
             }
-
         return result;
     },
         singIn: async (parent, args, { Users, req, res }) => {
-        if(args.login && args.password){
-            const user = await Users.findOne({
-                login: args.login,
-                password: args.password
-            });
-            if (!user) {
-                throw new Error('No user with that login')
+            console.log(req.headers.cookie)
+            if(args.login && args.password){
+                const user = await Users.findOne({
+                    login: args.login,
+                    password: args.password
+                });
+                if (!user) {
+                    throw new Error('No user with that login')
+                }
+                console.log(args)
+                console.log(user)
+                // const hash = bcrypt.hashSync(user.password);
+                // console.log(hash)
+                // const hash = bcrypt.hashSync(args.password, 10);
+                //
+                // bcrypt.compare(user.password, hash, function(err, res) {
+                //     // res == true
+                //     console.log(res)
+                //     console.log(err)
+                // });
+                // const valid = await bcrypt.compare(args.password, user.password)
+                // console.log(valid)
+                // if (!valid) {
+                //     throw new Error('Incorrect password')
+                // }
+
+                const token = jsonwebtoken.sign({
+                        id: user._id,
+                        login: user.login,
+                        type: user.type
+                    },
+                    'shhhhh-secret',
+                    {
+                        expiresIn: '1h'
+                    })
+                // console.log(user)
+                res.setHeader('authorization', token);
+                res.cookie('access_token', token)
+
+                return {token,user}
+            } else {
+                throw new Error('Password or Login not empty')
             }
-            console.log(args)
-            console.log(user)
-            // const hash = bcrypt.hashSync(user.password);
-            // console.log(hash)
-            // const hash = bcrypt.hashSync(args.password, 10);
-            //
-            // bcrypt.compare(user.password, hash, function(err, res) {
-            //     // res == true
-            //     console.log(res)
-            //     console.log(err)
-            // });
-            // const valid = await bcrypt.compare(args.password, user.password)
-            // console.log(valid)
-            // if (!valid) {
-            //     throw new Error('Incorrect password')
-            // }
-
-            const token = jsonwebtoken.sign({
-                    id: user._id,
-                    login: user.login,
-                    type: user.type
-                },
-                'shhhhh-secret',
-                {
-                    expiresIn: '1h'
-                })
-            // console.log(user)
-            // res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
-            res.cookie('access_token', token)
-
-            return {token,user}
-        } else {
-            throw new Error('Password or Login not empty')
-        }
     },
 }
